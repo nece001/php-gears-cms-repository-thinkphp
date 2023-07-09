@@ -71,5 +71,6 @@ class CmsModelDefinitionRepository implements ICmsModelDefinitionRepository
      */
     public function delete(CmsModelDefinitionEntity $definition)
     {
+        CmsModelDefinition::where('id', $definition->id)->delete();
     }
 }
