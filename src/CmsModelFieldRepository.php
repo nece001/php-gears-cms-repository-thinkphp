@@ -63,6 +63,7 @@ class CmsModelFieldRepository implements ICmsModelFieldRepository
             $model->sort = $entity->sort;
             $model->definition_id = $entity->definition_id;
             $model->search_type = $entity->search_type;
+            $model->value_type = $entity->value_type;
             $model->value_format = $entity->value_format;
             $model->save();
         }
