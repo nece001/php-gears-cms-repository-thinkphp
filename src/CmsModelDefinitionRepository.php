@@ -22,12 +22,9 @@ class CmsModelDefinitionRepository implements ICmsModelDefinitionRepository
     {
         $item = CmsModelDefinition::find($id);
         if ($item) {
-            $entity = new CmsModelDefinitionEntity();
-            $entity->id = $item->id;
-            $entity->title = $item->title;
+            $entity = new CmsModelDefinitionEntity($item->title, $item->is_disabled, $item->id);
             $entity->create_time = $item->create_time;
             $entity->update_time = $item->update_time;
-            $entity->is_disabled = $item->is_disabled;
             return $entity;
         }
 
@@ -42,7 +39,7 @@ class CmsModelDefinitionRepository implements ICmsModelDefinitionRepository
      *
      * @param CmsModelDefinitionEntity $entity
      *
-     * @return void
+     * @return CmsModelDefinitionEntity
      */
     public function createOrUpdate(CmsModelDefinitionEntity $entity)
     {
@@ -56,7 +53,11 @@ class CmsModelDefinitionRepository implements ICmsModelDefinitionRepository
             $model->title = $entity->title;
             $model->is_disabled = $entity->is_disabled ? 1 : 0;
             $model->save();
+
+            $entity->id = $model->id;
         }
+
+        return $entity;
     }
 
     /**
@@ -65,12 +66,12 @@ class CmsModelDefinitionRepository implements ICmsModelDefinitionRepository
      * @Author nece001@163.com
      * @DateTime 2023-07-08
      *
-     * @param CmsModelDefinitionEntity $definition
+     * @param string $id
      *
-     * @return void
+     * @return integer
      */
-    public function delete(CmsModelDefinitionEntity $definition)
+    public function deleteById($id)
     {
-        CmsModelDefinition::where('id', $definition->id)->delete();
+        return CmsModelDefinition::where('id', $id)->delete();
     }
 }

@@ -47,7 +47,7 @@ class CmsModelFieldRepository implements ICmsModelFieldRepository
      *
      * @param CmsModelFieldEntity $entity
      *
-     * @return void
+     * @return CmsModelFieldEntity
      */
     public function createOrUpdate(CmsModelFieldEntity $entity)
     {
@@ -66,7 +66,11 @@ class CmsModelFieldRepository implements ICmsModelFieldRepository
             $model->value_type = $entity->value_type;
             $model->value_format = $entity->value_format;
             $model->save();
+
+            $entity->id = $model->id;
         }
+
+        return $entity;
     }
 
     /**
@@ -75,12 +79,27 @@ class CmsModelFieldRepository implements ICmsModelFieldRepository
      * @Author nece001@163.com
      * @DateTime 2023-07-08
      *
-     * @param CmsModelFieldEntity $definition
+     * @param string $id;
      *
-     * @return void
+     * @return integer
      */
-    public function delete(CmsModelFieldEntity $definition)
+    public function deleteById($id)
     {
-        CmsModelField::where('id', $definition->id)->delete();
+        return CmsModelField::where('id', $id)->delete();
+    }
+
+    /**
+     * 删除模型的所有字段
+     *
+     * @Author nece001@163.com
+     * @DateTime 2023-07-11
+     *
+     * @param string $id
+     *
+     * @return integer
+     */
+    public function deleteByDefinitionId($id)
+    {
+        return CmsModelField::where('definition_id', $id)->delete();
     }
 }
