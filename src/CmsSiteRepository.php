@@ -99,6 +99,24 @@ class CmsSiteRepository  extends RepositoryAbstract implements ICmsSiteRepositor
     }
 
     /**
+     * 全部
+     *
+     * @Author nece001@163.com
+     * @DateTime 2023-10-06
+     *
+     * @return array
+     */
+    public function all(): array
+    {
+        $data = array();
+        $items = CmsSite::select();
+        foreach ($items as $item) {
+            $data[] = $this->modelToEntity($item);
+        }
+        return $data;
+    }
+
+    /**
      * 模型转实体
      *
      * @Author nece001@163.com

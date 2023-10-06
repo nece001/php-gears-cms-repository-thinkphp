@@ -2,11 +2,12 @@
 
 namespace Nece\Gears\Cms\Repository\ThinkPHP;
 
-use Nece\Gears\Cms\Entity\CmsModelFieldEntity;
-use Nece\Gears\Cms\Repository\ICmsModelFieldRepository;
+use Nece\Gears\Cms\Entity\Model\Field\CmsModelFieldEntity;
+use Nece\Gears\Cms\Entity\Model\Field\ICmsModelFieldRepository;
 use Nece\Gears\Cms\Repository\ThinkPHP\Model\CmsModelField;
+use Nece\Gears\RepositoryAbstract;
 
-class CmsModelFieldRepository implements ICmsModelFieldRepository
+class CmsModelFieldRepository extends RepositoryAbstract implements ICmsModelFieldRepository
 {
     /**
      * 查询模型字段
@@ -18,25 +19,11 @@ class CmsModelFieldRepository implements ICmsModelFieldRepository
      *
      * @return CmsModelFieldEntity|null
      */
-    public function find($id)
+    public function find($id): ?CmsModelFieldEntity
     {
         $item = CmsModelField::find($id);
-        if ($item) {
-            $entity = new CmsModelFieldEntity();
-            $entity->id = $item->id;
-            $entity->title = $item->title;
-            $entity->create_time = $item->create_time;
-            $entity->update_time = $item->update_time;
-            $entity->is_disabled = $item->is_disabled;
-            $entity->sort = $item->sort;
-            $entity->definition_id = $item->definition_id;
-            $entity->search_type = $item->search_type;
-            $entity->value_type = $item->value_type;
-            $entity->value_format = $item->value_format;
-            return $entity;
-        }
 
-        return null;
+        return $this->modelToEntity($item);
     }
 
     /**
@@ -47,30 +34,32 @@ class CmsModelFieldRepository implements ICmsModelFieldRepository
      *
      * @param CmsModelFieldEntity $entity
      *
-     * @return CmsModelFieldEntity
+     * @return integer
      */
-    public function createOrUpdate(CmsModelFieldEntity $entity)
+    public function createOrUpdate(CmsModelFieldEntity $entity): int
     {
         if ($entity) {
             if ($entity->id) {
                 $model = CmsModelField::find($entity->id);
-            } else {
-                $model = new CmsModelField();
             }
 
-            $model->title = $entity->title;
-            $model->is_disabled = $entity->is_disabled ? 1 : 0;
-            $model->sort = $entity->sort;
-            $model->definition_id = $entity->definition_id;
-            $model->search_type = $entity->search_type;
-            $model->value_type = $entity->value_type;
-            $model->value_format = $entity->value_format;
+            if (!isset($model)) {
+                $model = new CmsModelField();
+                $model->definition_id = $entity->definition_id;
+            }
+
+            $model->title         = $entity->title;
+            $model->is_disabled   = $entity->is_disabled ? 1 : 0;
+            $model->sort          = $entity->sort;
+            $model->search_type   = $entity->search_type;
+            $model->value_type    = $entity->value_type;
+            $model->value_format  = $entity->value_format;
             $model->save();
 
-            $entity->id = $model->id;
+            return $model->id;
         }
 
-        return $entity;
+        return 0;
     }
 
     /**
@@ -79,13 +68,13 @@ class CmsModelFieldRepository implements ICmsModelFieldRepository
      * @Author nece001@163.com
      * @DateTime 2023-07-08
      *
-     * @param string $id;
+     * @param array $ids
      *
      * @return integer
      */
-    public function deleteById($id)
+    public function delete(array $ids): int
     {
-        return CmsModelField::where('id', $id)->delete();
+        return CmsModelField::whereIn('id', $ids)->delete();
     }
 
     /**
@@ -98,8 +87,60 @@ class CmsModelFieldRepository implements ICmsModelFieldRepository
      *
      * @return integer
      */
-    public function deleteByDefinitionId($id)
+    public function deleteByDefinitionId($id): int
     {
         return CmsModelField::where('definition_id', $id)->delete();
+    }
+
+    /**
+     * 定义的字段列表
+     *
+     * @Author nece001@163.com
+     * @DateTime 2023-10-06
+     *
+     * @param integer $id
+     *
+     * @return array
+     */
+    public function listByDefinitionId($id): array
+    {
+        $data = array();
+        $query = CmsModelField::where('definition_id', $id);
+        $items = $query->select();
+
+        foreach ($items as $item) {
+            $data[] = $this->modelToEntity($item);
+        }
+        return $data;
+    }
+
+    /**
+     * 模型转实体
+     *
+     * @Author nece001@163.com
+     * @DateTime 2023-10-06
+     *
+     * @param \think\model $model
+     *
+     * @return CmsModelFieldEntity
+     */
+    private function modelToEntity($model)
+    {
+        if ($model) {
+            $entity = new CmsModelFieldEntity();
+            $entity->id            = $model->id;
+            $entity->title         = $model->title;
+            $entity->create_time   = $model->create_time;
+            $entity->update_time   = $model->update_time;
+            $entity->is_disabled   = $model->is_disabled;
+            $entity->sort          = $model->sort;
+            $entity->definition_id = $model->definition_id;
+            $entity->search_type   = $model->search_type;
+            $entity->value_type    = $model->value_type;
+            $entity->value_format  = $model->value_format;
+
+            return $entity;
+        }
+        return null;
     }
 }
